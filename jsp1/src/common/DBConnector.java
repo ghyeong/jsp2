@@ -13,7 +13,7 @@ public class DBConnector {
 		if(con==null) {
 			String url ="jdbc:mysql://localhost:3306/jsp_study";
 			String id ="root";
-			String pwd ="5326";
+			String pwd ="manager";
 			Class.forName("org.mariadb.jdbc.Driver");
 			con =DriverManager.getConnection(url, id, pwd);
 		}

@@ -40,6 +40,7 @@
 		</tr>
 		
 		</table>
+		<input type="hidden" name="command" value="signup">
 	</form>
 
 </body>

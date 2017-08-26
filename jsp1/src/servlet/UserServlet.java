@@ -2,53 +2,83 @@ package servlet;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
-import common.DBConnector;
+import service.UserService;
+import service.implement.UserServiceImpl;
 
 public class UserServlet extends HttpServlet {
+	private UserService us = new UserServiceImpl();
 
-	public void doPost(HttpServletRequest request, HttpServletResponse resp) throws ServletException, IOException {
+	public void doPost(HttpServletRequest request, HttpServletResponse resp) 
+			throws ServletException, IOException {
 		request.setCharacterEncoding("utf-8");
-		String id = request.getParameter("id");
-		String pwd = request.getParameter("pwd");
-		String name = request.getParameter("name");
-		String[] hobbies = request.getParameterValues("hobby");
-		String hobby = "";
-		for (String h : hobbies) {
-			hobby += h + ",";
-		}
-		hobby = hobby.substring(0, hobby.length() - 1);
-		
-		String result = name+"님 회원가입에 실패했습니다.";
-		Connection con;
-		try {
-			con = DBConnector.getCon();
-			String sql = "insert into user(id,password,name,hobby)";
-			sql += "values(?,?,?,?)";
-			PreparedStatement ps = con.prepareStatement(sql);
-			ps.setString(1, id);
-			ps.setString(2, pwd);
-			ps.setString(3, name);
-			ps.setString(4, hobby);
-			int row = ps.executeUpdate(); 
-			if(row ==1) {
-				result =name + "님 회원가입에 성공하셨습니다.";
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		doProcess(resp, result);
+		String command = request.getParameter("command");
+		if (command == null) {
+			doProcess(resp, "잘못된 요청입니다.");
+		} else {
+			if (command.equals("signup")) {
+				String id = request.getParameter("id");
+				String pwd = request.getParameter("pwd");
+				String name = request.getParameter("name");
+				String[] hobbies = request.getParameterValues("hobby");
+				String hobby = "";
+				for (String h : hobbies) {
+					hobby += h + ",";
+				}
 
+				hobby = hobby.substring(0, hobby.length() - 1);
+				Map<String, String> hm = new HashMap<String, String>();
+				hm.put("id", id);
+				hm.put("pwd", pwd);
+				hm.put("name", name);
+				hm.put("hobby", hobby);
+				String result = us.insertUser(hm);
+				doProcess(resp, result);
+
+			} else if (command.equals("login")) {
+				String id = request.getParameter("id");
+				String pwd = request.getParameter("pwd");
+				Map<String, String> hm = new HashMap<String, String>();
+				hm.put("id", id);
+				hm.put("pwd", pwd);
+				Map<String, String> resultMap = us.selectUser(hm);
+				if (resultMap.get("id") != null) {
+					HttpSession session = request.getSession();
+					session.setAttribute("user",resultMap);
+				}
+				doProcess(resp, resultMap.get("result"));
+			}else if (command.equals("logout")) {
+				HttpSession session = request.getSession();
+				session.invalidate();
+				resp.sendRedirect("/login.jsp");
+			}else if(command.equals("delete")) {
+				String userNo = request.getParameter("userNo");
+				Map<String, String> hm = new HashMap<String, String>();
+				hm.put("user_no",userNo);
+				int rCnt = us.deleteUser(hm);
+				String result="회원탈퇴에 실패하셨습니다.";
+				if(rCnt==1) {
+					result="회원탈퇴에 성공하셨습니다.";
+					result +="<script>";
+					result +="alter('회원탈퇴에 성공하셨습니다.');";
+					result +="</script>";
+					
+				}
+				doProcess(resp, result);
+			}			
+		}
 	}
 
-	public void doGet(HttpServletRequest request, HttpServletResponse resp) throws ServletException, IOException {
+	public void doGet(HttpServletRequest request, HttpServletResponse resp) 
+			throws ServletException, IOException {
 
 	}
 
