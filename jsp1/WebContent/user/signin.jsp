@@ -7,7 +7,7 @@
 <title>회원가입</title>
 </head>
 <body>
-	<form action="signup.user" method="post">
+	<form action="signin.user" method="post">
 		<table border="1">
 			<tr>
 				<td colspan="2" align="center">회원가입</td>
@@ -40,7 +40,7 @@
 		</tr>
 		
 		</table>
-		<input type="hidden" name="command" value="signup">
+		<input type="hidden" name="command" value="signin">
 	</form>
 
 </body>

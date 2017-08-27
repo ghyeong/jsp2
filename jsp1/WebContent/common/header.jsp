@@ -5,20 +5,21 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<title>Insert title here</title>
-</head>
-<body>
-<%
-	
-	
-	if(session.getAttribute("user")==null){
-		response.sendRedirect("/user/login.jsp");
-		
-	}else{
-		Map<String,String> user =(Map)session.getAttribute("user");
-		out.println(user.get("name") +"님 환영합니다.");
-	}
+<script src="/js/jquery-3.2.1.min.js"></script>
+	<%
+		Map<String, String> user = null;
 
-%>
-</body>
-</html>
+		if (session.getAttribute("user") != null) {
+			user = (Map<String, String>) session.getAttribute("user");
+
+		}else{
+			%>
+			
+	<script>
+		location.href="/user/login.jsp";
+	</script>
+			<%
+	
+		}
+		
+	%>
